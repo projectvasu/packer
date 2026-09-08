@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
+# wait for cloud-init to finish
+sudo cloud-init status --wait || true
+
+# wait for the yum lock to clear (max 5 min)
+for i in $(seq 1 60); do
+  sudo fuser /var/run/yum.pid >/dev/null 2>&1 || break
+  echo "yum locked, retry $i/60"
+  sleep 5
+done
+
+sudo yum -y update
+sudo yum install -y git jq unzip docker
+sudo systemctl enable docker
+sudo usermod -aG docker ec2-user
+
 #--- 1. patch the base OS -------------------------------------------
 dnf -y update
 
