@@ -27,9 +27,12 @@ jobs:
 
       - name: Initialise
         run: packer init .
+        working-directory: base
 
       - name: Validate
         run: packer validate .
+        working-directory: base
 
       - name: Build AMI
         run: packer build -color=false base-ami.pkr.hcl
+        working-directory: base
