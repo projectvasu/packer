@@ -1,34 +1,44 @@
 pipeline {
     agent any
+
+    environment {
+        AWS_REGION = 'ap-south-1'
+    }
+
     stages {
-        stage("AWS Demo") {
+        stage('Checkout') {
             steps {
-                withCredentials([
-                    [
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: 'aws_credential',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]
-                ]) {
-                    sh "aws s3 ls"
+                checkout scm
+            }
+        }
+
+        stage('Packer Init') {
+            steps {
+                dir('base') {
+                    sh 'packer init .'
                 }
             }
         }
-        stage("Building AMI") {
+
+        stage('Packer Validate') {
             steps {
-                withCredentials([
-                    [
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: 'aws_credential',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]
-                ]) {
-                    sh "packer init aws-ami-v1.pkr.hcl"
-                    sh "packer build aws-ami-v1.pkr.hcl"
+                dir('base') {
+                    sh 'packer validate .'
                 }
             }
         }
+
+        stage('Build AMI') {
+            steps {
+                dir('base') {
+                    sh 'packer build -color=false base-ami.pkr.hcl'
+                }
+            }
+        }
+    }
+
+    post {
+        success { echo 'AMI built. Check EC2 → Images → AMIs.' }
+        failure { echo 'Build failed. Check the console output above.' }
     }
 }
