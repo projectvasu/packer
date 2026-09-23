@@ -7,9 +7,20 @@ packer {
   }
 }
 
-variable "region"       { type = string  default = "ap-south-1" }
-variable "ami_version"  { type = string  default = "1.0.1" }
-variable "build_number" { type = string  default = "local" }
+variable "region" {
+  type    = string
+  default = "ap-south-2"
+}
+
+variable "ami_version" {
+  type    = string
+  default = "1.0.1"
+}
+
+variable "build_number" {
+  type    = string
+  default = "local"
+}
 
 locals {
   stamp = formatdate("YYYYMMDD-hhmmss", timestamp())

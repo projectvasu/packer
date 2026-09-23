@@ -1,0 +1,35 @@
+name: Build Base AMI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Log in to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-south-1
+
+      - name: Install Packer
+        uses: hashicorp/setup-packer@main
+
+      - name: Initialise
+        run: packer init .
+
+      - name: Validate
+        run: packer validate .
+
+      - name: Build AMI
+        run: packer build -color=false base-ami.pkr.hcl
