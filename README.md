@@ -8,3 +8,4 @@ Project Description:
 Solution Design:
 
 Submission Details:
+Packer golden AMI project
